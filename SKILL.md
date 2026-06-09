@@ -1,7 +1,7 @@
 ---
 name: pinterest-research
 description: デザイン／撮影／構想のお題に対して 3 方向のリサーチ角度を立て、それぞれ Pinterest を中心に参考画像 12 枚（1 方向 = 3×4 グリッド = 12 枚、× 3 方向 = 計 36 枚 / 1 シート）を集めて 1 枚の HTML コンタクトシートにまとめる Skill。画像はローカル保存・元 pin に別ウィンドウでリンク・セレクト理由のキャプション・方向-列バッジ（A-a〜C-l）付き。「A-c を深掘り」で次の精度に進める。トリガー: 「/pinterest-research」「リファレンス 集めて」「ピンタレスト リサーチ」「ムードボード 作って」「コンタクトシート」「ビジュアル 参考」「<お題> のリファレンス」「<X-y> を深掘り」（X=A/B/C, y=a〜l）。
-license: MIT
+license: Proprietary
 ---
 
 # pinterest-research
@@ -17,7 +17,7 @@ license: MIT
 
 成果物は **コマンド実行時の CWD 配下** に書き出す:
 ```
-<CWD>/pinterest-research/<slug>-<YYYYMMDD-HHMM>/
+<CWD>/_outputs/pinterest-research/<slug>-<YYYYMMDD-HHMM>/
   index.html
   meta.json
   .assets/<sha1>.<ext>
@@ -135,7 +135,7 @@ A 案の精度を上げるため、Phase A の構想を出す前に **WebSearch 
 ```bash
 python3 "$HOME/.claude/skills/pinterest-research/scripts/research.py" build \
   --input <input.json のパス> \
-  --out  "<CWD>/pinterest-research"
+  --out  "<CWD>/_outputs/pinterest-research"
 ```
 
 スクリプトの動き:
@@ -155,13 +155,13 @@ python3 "$HOME/.claude/skills/pinterest-research/scripts/research.py" build \
 ユーザー入力例: 「**A-c を深掘り**」「**B-a の方向で、もっと暗くマットに**」
 
 手順:
-1. **直近の `meta.json`** を探す（CWD 配下 `pinterest-research/*/meta.json` のうち最新 mtime）
+1. **直近の `meta.json`** を探す（CWD 配下 `_outputs/pinterest-research/*/meta.json` のうち最新 mtime）
 2. 対象 ID（例: `A-c`）の `src_url` / `query` / `rationale` をシードに、**新しい 3 方向** を組み立てる:
    - 新 A: シード画像の最近接（同 query + キーワード強化）
    - 新 B: シードの **質感方向に振る**（ユーザーが追加指示を出していれば最優先で反映）
    - 新 C: シードの **構図方向に振る** か、片軸（光・余白・色温度・素材感）を反対側に振る
 3. Phase A のユーザー確認は **省略**（既に深掘り指示が出ているため）、直接 Phase B → research.py へ
-4. 出力先は元と区別: `pinterest-research/<元 slug>-drill-Ac-<YYYYMMDD-HHMM>/`
+4. 出力先は元と区別: `_outputs/pinterest-research/<元 slug>-drill-Ac-<YYYYMMDD-HHMM>/`
 
 ## 6. HTML 仕様（テンプレ）
 
@@ -186,4 +186,14 @@ python3 "$HOME/.claude/skills/pinterest-research/scripts/research.py" build \
 
 - WebSearch が 1 方向で 0 件返した場合: その方向だけ「該当ピンを集められませんでした。角度を変えてください」プレースホルダで描画し、他方向は完成させて出す。ユーザーに角度の振り直しを促す
 - og:image が取れない pin: placeholder + キャプションに「(原典のみリンク)」を付記してリンクは生かす
-- 出力先 CWD 直下に既に `pinterest-research/` がある場合: 上書きせず timestamp 付き子ディレクトリで並走させる
+- 出力先 CWD 配下に既に `_outputs/pinterest-research/` がある場合: 上書きせず timestamp 付き子ディレクトリで並走させる
+
+## Cross-project learning memory
+
+3 方向のリサーチ角度を立てる前に `~/.claude/learning/INDEX.md` を確認する。pinterest-research として効くのは:
+
+- **preferences/** — ビジュアル方向性のクセ（被写体中心・余白広め・人物入り嫌い等）
+- **people/** — クライアントの世界観・避ける表現
+- **incidents/** — 過去の参考画像で「これじゃない」と言われた方向
+
+該当があれば 3 角度の初期案に反映する。コンタクトシート出力時にキャプションへ「learning/preferences/<slug> 由来」を最小注釈で残す。

@@ -5,7 +5,7 @@
 ローカルに保存し、HTML コンタクトシートと meta.json を出力する。
 
 使い方:
-    python3 research.py build --input input.json --out /path/to/pinterest-research
+    python3 research.py build --input input.json --out /path/to/_outputs/pinterest-research
 
 入力 JSON 形式:
     {
@@ -427,7 +427,7 @@ def main() -> int:
     sub = parser.add_subparsers(dest="cmd", required=True)
     p_build = sub.add_parser("build", help="JSON 入力からコンタクトシートを生成")
     p_build.add_argument("--input", required=True, help="入力 JSON のパス")
-    p_build.add_argument("--out", required=True, help="出力ルート（pinterest-research ディレクトリ）")
+    p_build.add_argument("--out", required=True, help="出力ルート（_outputs/pinterest-research ディレクトリ）")
     p_build.add_argument(
         "--drill-from",
         default="",
