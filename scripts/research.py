@@ -318,8 +318,15 @@ def render_section(direction: str, info: dict[str, Any], asset_rel: str) -> str:
     interpretation = html.escape(info.get("interpretation") or "")
     cards: list[str] = []
     items = info.get("items") or []
+    # 「原典のみリンク」プレースホルダ（local_path 無し = og:image 取得失敗 or items 未指定）は
+    # ユーザーから無価値と評価されたため grid に出さない。
+    # badge ID（A-c 等）は input JSON の元 index を維持して深掘り指定の整合性を保つ。
     for idx, col_letter in enumerate(COLUMNS):
-        item = items[idx] if idx < len(items) else {"src_url": "", "rationale": "(該当ピン未収集)"}
+        if idx >= len(items):
+            continue
+        item = items[idx]
+        if not item.get("local_path"):
+            continue
         cards.append(render_card(direction, col_letter, item, asset_rel))
     return f"""
     <section class="direction" id="dir-{direction}">
